@@ -1,5 +1,6 @@
 import json
 from django.core.serializers.json import DjangoJSONEncoder
+from django.shortcuts import render
 from django.views import generic as views
 from cm_api.resources import SubscriberResource
 
@@ -17,3 +18,9 @@ class ProfileAdminView (views.TemplateView):
             subscriber_data, cls=DjangoJSONEncoder)
 
         return context
+
+
+class LandingPageView (views.View):
+
+    def get(self, request):
+        return render(request, 'cm/index.html', {})

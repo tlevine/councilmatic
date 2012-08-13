@@ -34,6 +34,8 @@ urlpatterns = patterns(
     url(r'^social/', include('social_auth.urls')),
     url(r'', include('captcha.backends.default.urls')),
 
+    url(r'^', include('cm.urls', namespace='cm')),
+
     url(r'^subscribe/$', subscriptions.views.CreateSubscriptionView.as_view(), name='subscribe'),
     url(r'^unsubscribe/(?P<pk>\d+)/$', subscriptions.views.DeleteSubscriptionView.as_view(), name='unsubscribe'),
 
@@ -101,9 +103,9 @@ urlpatterns = patterns(
     # optional comma-separated list of integers -- ((?:\d+,)+\d+)? -- will be
     # treated as a list of primary keys.
     #
-    url(r'^api/', 
+    url(r'^api/',
         include('djangorestframework.urls', namespace='djangorestframework')),
-    
+
     url(r'^api/v2/subscribers/(?P<pk>\d+)$',
         cm_api.views.SubscriberView.as_view(),
         name='api_subscriber_instance'),

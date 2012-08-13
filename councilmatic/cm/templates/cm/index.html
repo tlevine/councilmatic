@@ -1,0 +1,76 @@
+{% load url from future %}
+{% load i18n %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Councilmatic</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link href="{{ STATIC_URL }}libs/css/bootstrap.css" rel="stylesheet">
+    <link href="{{ STATIC_URL }}libs/css/bootstrap-responsive.css" rel="stylesheet">
+    <link href="{{ STATIC_URL }}cm/css/cm-style.css" rel="stylesheet">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le fav and touch icons -->
+    <link rel="shortcut icon" href="{{ STATIC_URL }}cm/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="{{ STATIC_URL }}cm/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="{{ STATIC_URL }}cm/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="{{ STATIC_URL }}cm/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="{{ STATIC_URL }}cm/ico/apple-touch-icon-57-precomposed.png">
+  </head>
+
+  <body>
+
+    <header class="page-header">
+
+      <div class="container">
+        <h1 class="branding"><a href="{% url 'cm:landing' %}">{% trans 'Councilmatic' %}</a></h1>
+
+        <nav class="main-nav nav">
+          <ul>
+            <li><a href="{% url 'cm:browse' %}">{% trans 'Browse' %}</a></li>
+            <li><a href="{% url 'cm:about' %}">{% trans 'About' %}</a></li>
+            <li><a href="{% url 'cm:login' %}">{% trans 'Log in' %}</a></li>
+            <li><a href="{% url 'cm:signup' %}">{% trans 'Sign up' %}</a></li>
+          </ul>
+        </nav>
+
+        <form class="search-form" action="{% url 'cm:search' %}" method="GET">
+          <input name="q" placeholder="{% trans 'Search' %}">
+        </form>
+      </div>
+
+    </header> <!-- /page-header -->
+
+    <div class="container">
+
+    </div> <!-- /container -->
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="{{ STATIC_URL }}libs/js/jquery.js"></script>
+    <script src="{{ STATIC_URL }}libs/js/bootstrap-transition.js"></script>
+    <script src="{{ STATIC_URL }}libs/js/bootstrap-alert.js"></script>
+    <script src="{{ STATIC_URL }}libs/js/bootstrap-modal.js"></script>
+    <script src="{{ STATIC_URL }}libs/js/bootstrap-dropdown.js"></script>
+    <script src="{{ STATIC_URL }}libs/js/bootstrap-scrollspy.js"></script>
+    <script src="{{ STATIC_URL }}libs/js/bootstrap-tab.js"></script>
+    <script src="{{ STATIC_URL }}libs/js/bootstrap-tooltip.js"></script>
+    <script src="{{ STATIC_URL }}libs/js/bootstrap-popover.js"></script>
+    <script src="{{ STATIC_URL }}libs/js/bootstrap-button.js"></script>
+    <script src="{{ STATIC_URL }}libs/js/bootstrap-collapse.js"></script>
+    <script src="{{ STATIC_URL }}libs/js/bootstrap-carousel.js"></script>
+    <script src="{{ STATIC_URL }}libs/js/bootstrap-typeahead.js"></script>
+
+  </body>
+</html>
