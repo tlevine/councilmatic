@@ -17,9 +17,12 @@ log = logging.getLogger(__name__)
 
 class HostedLegistarSiteWrapper (object):
     """
-    A facade over the Philadelphia city council legistar site data.  It is
-    responsible for scraping data out of the site.  The main external point
-    of interaction is scrape_legis_file.
+    A generic facade over hosted legistar site data scraper.
+    It is responsible for interpreting data scraped out of the site by LegistarScraper.
+    The main external point of interaction is scrape_legis_file.
+    NOTE that this is a superclass that will not run by itself and isn't
+    meant to be; you are expected to run a subclass that implements
+    some functions with names starting with "pluck".
 
     requires: BeautifulSoup, mechanize
     """
@@ -51,9 +54,6 @@ class HostedLegistarSiteWrapper (object):
                     print 'sleeping for five minutes'
                     time.sleep('360')
 
-
-
-            
         parsed_url = urlparse.urlparse(summary['URL'])
         key = urlparse.parse_qs(parsed_url.query)['ID'][0]
         
@@ -67,32 +67,9 @@ class HostedLegistarSiteWrapper (object):
                 sponsor = ' '.join(name_list).strip()
             first_name_first_sponsors.append(sponsor)
 
-        record = {
-            'key' : key,
-            'id' : summary['Record #'],
-            'url' : summary['URL'],
-            'type' : summary['Type'],
-            'status' : summary['Status'],
-            'title' : summary['Title'],
-            'controlling_body' : legislation_attrs['Current Controlling Legislative Body'],
-            'intro_date' : self.convert_date(summary['Intro Date']),
-            'final_date' : self.convert_date(summary.setdefault('Final Date', '')),
-            'version' : summary.setdefault('Version', ''),
-            #'contact' : None,
-            'sponsors' : first_name_first_sponsors,
-            # probably remove this from the model as well
-            'minutes_url'  : None
-        }
+        record = self.pluck_record(summary, legislation_attrs)
 
-        try:
-            attachments = legislation_attrs['Attachments']
-            for attachment in attachments:
-                attachment['key'] = key
-                attachment['file'] = attachment['label']
-                attachment['description'] = attachment['label']
-                del attachment['label']
-        except KeyError:
-            attachments = []
+        attachments = self.pluck_attachments(legislation_attrs)
 
         actions = []
         for act in legislation_history :
