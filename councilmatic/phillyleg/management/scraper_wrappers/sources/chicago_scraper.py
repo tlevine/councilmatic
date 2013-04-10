@@ -8,6 +8,16 @@ class ChicogoHostedLegistarSiteWrapper (HostedLegistarSiteWrapper):
     """
 
     def pluck_record(self, summary, legislation_attrs):
+        # re-order the sponsor name by '[First] [Last]' instead of '[Last], [First]'
+        sponsors = legislation_attrs['Sponsors']
+        first_name_first_sponsors = []
+        for sponsor in sponsors :
+            if ',' in sponsor :
+                name_list = sponsor.split(',')
+                name_list.reverse()
+                sponsor = ' '.join(name_list).strip()
+            first_name_first_sponsors.append(sponsor)
+
         record = {
             'key' : key,
             'id' : summary['Record #'],

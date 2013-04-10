@@ -57,19 +57,9 @@ class HostedLegistarSiteWrapper (object):
         parsed_url = urlparse.urlparse(summary['URL'])
         key = urlparse.parse_qs(parsed_url.query)['ID'][0]
         
-        # re-order the sponsor name by '[First] [Last]' instead of '[Last], [First]'
-        sponsors = legislation_attrs['Sponsors']
-        first_name_first_sponsors = []
-        for sponsor in sponsors :
-            if ',' in sponsor :
-                name_list = sponsor.split(',')
-                name_list.reverse()
-                sponsor = ' '.join(name_list).strip()
-            first_name_first_sponsors.append(sponsor)
+        record = self.pluck_record(key, summary, legislation_attrs)
 
-        record = self.pluck_record(summary, legislation_attrs)
-
-        attachments = self.pluck_attachments(legislation_attrs)
+        attachments = self.pluck_attachments(key, legislation_attrs)
 
         actions = []
         for act in legislation_history :
