@@ -1,6 +1,6 @@
 Councilmatic! [![Build Status](https://travis-ci.org/codeforamerica/councilmatic.png)](http://travis-ci.org/codeforamerica/councilmatic)
 =============
-Philly City Council Legislative Subscription Service.
+Legislative Subscription Service.
 
 Contact Us
 ----------
@@ -68,7 +68,7 @@ while.
     $ cd councilmatic
     $ python manage.py syncdb # Create admin account when prompted.
     $ python manage.py migrate
-    $ python manage.py loadlegfiles
+    $ python manage.py updatelegfiles
     $ python manage.py rebuild_index # For searches. Say yes when prompted.
     $ python manage.py collectstatic # For jss and css. Say yes when prompted.
 
