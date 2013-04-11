@@ -2,6 +2,7 @@
 {% load model_blocks %}
 {% load uni_form_tags %}
 {% load compress %}
+{% load cache %}
 
 {% block load_early %}
 <!--	<link rel="stylesheet" href="{{ STATIC_URL }}phillyleg/legislation.css">-->
@@ -23,16 +24,18 @@
                 <input name="q" type="text" class="textInput" placeholder="Rahm Emanuel, zoning, resolution #R2013-1, etc.">
             </div>
         </form>
-
+	
         <div id="dashboard_legislation">
             <h2>Recent legislation</h2>
 
             <ul>
+	    {% cache 1800 bookmark_data %}
             {% for file, bookmark, contenttype, bookmark_form in bookmark_data %}
                 <li>
                     {% include "main/partials/dashboard_legfile_teaser.html" %}
                 </li>
             {% endfor %}
+	    {% endcache %}
             </ul>
 
             <a href="{% url search %}">More...</a>
@@ -56,14 +59,14 @@
               var initialize = function() {
                 var myOptions = {
                       zoom: 10,
-                      center: new google.maps.LatLng(40.006054, -75.147858),
+                      center: new google.maps.LatLng(41.8781136, -87.6667785),
                       mapTypeId: google.maps.MapTypeId.ROADMAP
                     },
                     latlngs = [];
 
                 map = new google.maps.Map(document.getElementById('dashboard_locations_map_cavas'),
                     myOptions);
-
+		{% cache 1800 locations %}
                 {% for location in locations %}
                 var markerOptions = {
                   map: map,
@@ -82,6 +85,7 @@
                 {% endif %}
 
                 {% endfor %}
+		{% endcache %}
 
                 zoomToFitMarkers(map, latlngs)
               };

@@ -816,9 +816,19 @@ body #site_header .header_wrapper .search button {
   height: 2em;
   width: 2em;
 }
+
+.legislation_stats {
+  width: 48%;
+  float: left;
+}
+
+.sponsors {
+  width: 48%;
+  float: right;
+}
+
 /* line 79, ../sass/partials/_legfile_detail.scss */
 .legfile_detail .inner .overview_bar {
-  font-family: 'Quattrocento', 'Garamond', serif;
   clear: both;
   border: 1px solid #cccccc;
   border-image: url("../images/pen_stroke.png") 4 repeat;
@@ -828,7 +838,6 @@ body #site_header .header_wrapper .search button {
 /* line 88, ../sass/partials/_legfile_detail.scss */
 .legfile_detail .inner .overview_bar span {
   display: inline-block;
-  text-align: center;
   width: 33%;
 }
 /* line 93, ../sass/partials/_legfile_detail.scss */
@@ -968,6 +977,16 @@ body #site_header .header_wrapper .search button {
 .legfile_detail .inner .block.locations, * html
 .legfile_detail .inner .block.references {
   overflow-x: hidden;
+}
+
+#controlling_body {
+  padding-top: 20px;
+}
+
+#enter_opinion {
+  border-top: 1px solid #cccccc;
+  clear: both;
+  padding: 1em 0;
 }
 
 /* line 206, ../sass/partials/_legfile_detail.scss */
