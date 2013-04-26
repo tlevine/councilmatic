@@ -35,7 +35,6 @@ urlpatterns = patterns(
     url(r'^logout/$', 'django.contrib.auth.views.logout', name='registration_logout'),
 
     url(r'^social/', include('social_auth.urls')),
-    url(r'', include('captcha.backends.default.urls')),
 
     url(r'^subscriptions/$', subscriptions.views.SubscriptionListView.as_view(), name='subscription_list'),
     url(r'^subscribe/$', subscriptions.views.CreateSubscriptionView.as_view(), name='subscribe'),
@@ -63,6 +62,9 @@ urlpatterns = patterns(
         main.views.NewLegislationFeed(),
         name='legislation_feed'),
 
+    url(r'^member/(?P<pk>\d+)$', main.views.CouncilMemberDetailView.as_view(),
+        name='councilmember_detail'),
+
     url(r'^minutes/$', ListView.as_view(
         model=phillyleg.models.LegMinutes,
         template_name='phillyleg/legminutes_list.html'),
@@ -75,10 +77,6 @@ urlpatterns = patterns(
     url(r'^bookmarks/$',
         main.views.BookmarkListView.as_view(),
         name='bookmark_list'),
-
-    url(r'^subscriptions/$',
-        main.views.SubscriptionManagementView.as_view(),
-        name='subscription_management'),
 
     url(r'^search/$', main.views.SearchView.as_view(),
         name='search'),

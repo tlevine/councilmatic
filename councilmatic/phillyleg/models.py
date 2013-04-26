@@ -80,6 +80,9 @@ class CouncilMemberTenure(TimestampedModelMixin, models.Model):
     begin = models.DateField(blank=True)
     end = models.DateField(null=True, blank=True)
 
+    class Meta (object):
+        ordering = ('-begin',)
+
 
 class CouncilDistrictPlan(TimestampedModelMixin, models.Model):
     date = models.DateField()
@@ -109,7 +112,7 @@ class CouncilDistrict(TimestampedModelMixin, models.Model):
 class LegFile(TimestampedModelMixin, models.Model):
     key = models.IntegerField(primary_key=True)
     id = models.CharField(max_length=100, null=True)
-    #contact = models.CharField(max_length=1000)
+    contact = models.CharField(max_length=1000, default="No contact")
     controlling_body = models.CharField(max_length=1000)
     date_scraped = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     last_scraped = models.DateTimeField(auto_now=True)
@@ -193,6 +196,9 @@ class LegFile(TimestampedModelMixin, models.Model):
         addresses = ebdata.nlp.addresses.parse_addresses(self.all_text())
         return addresses
 
+    def topics(self):
+        return settings.TOPIC_CLASSIFIER(self.title)
+
     def mentioned_legfiles(self):
         """
         Gets a generator for any files (specifically, bills) mentioned in the
@@ -226,7 +232,7 @@ class LegFile(TimestampedModelMixin, models.Model):
         if commit:
             return self.save(**save_kwargs)
 
-    def save(self, update_words=True, update_mentions=True, update_locations=True, *args, **kwargs):
+    def save(self, update_words=True, update_mentions=True, update_locations=True, update_topics=True, *args, **kwargs):
         """
         Calls the default ``Models.save()`` method, and creates or updates
         metadata for the legislative file as well.
@@ -263,6 +269,13 @@ class LegFile(TimestampedModelMixin, models.Model):
             metadata.mentioned_legfiles.clear()
             for mentioned_legfile in self.mentioned_legfiles():
                 metadata.mentioned_legfiles.add(mentioned_legfile)
+
+        if update_topics:
+            # Add topics to the metadata
+            metadata.topics.clear()
+            for topic in self.topics():
+                t = MetaData_Topic.objects.get_or_create(topic=topic)[0]
+                metadata.topics.add(t)
 
         metadata.save()
 
@@ -379,7 +392,11 @@ class LegFileMetaData (TimestampedModelMixin, models.Model):
     legfile = models.OneToOneField('LegFile', related_name='metadata')
     words = models.ManyToManyField('MetaData_Word', related_name='references_in_legislation')
     locations = models.ManyToManyField('MetaData_Location', related_name='references_in_legislation')
+    topics = models.ManyToManyField('MetaData_Topic', related_name='references_in_legislation')
     mentioned_legfiles = models.ManyToManyField('LegFile', related_name='references_in_legislation')
+    
+    def valid_locations(self):
+        return self.locations.filter(valid=True)
 
     def __unicode__(self):
         return (u'%s (mentions %s other files, mentioned by %s other files)' % \
@@ -432,3 +449,8 @@ class MetaData_Location (TimestampedModelMixin, models.Model):
             log.debug('Could not geocode the address "%s"' % self.address)
             raise self.CouldNotBeGeocoded(self.address)
 
+class MetaData_Topic (models.Model):
+    topic = models.CharField(max_length=128, unique=True)
+
+    def __unicode__(self):
+        return '%r (topics: %s)' % (self.topic, len(self.references.all()))
