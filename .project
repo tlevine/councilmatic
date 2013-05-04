@@ -3,6 +3,7 @@
 	<name>councilmatic</name>
 	<comment></comment>
 	<projects>
+		<project>legistar-scrape</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
