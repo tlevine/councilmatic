@@ -25,9 +25,9 @@ class OaklandHostedLegistarSiteWrapper (HostedLegistarSiteWrapper):
             'controlling_body' : legislation_attrs['In control'],
             'intro_date' : self.convert_date(legislation_attrs['File created']),
             'final_date' : self.convert_date(summary.setdefault('Final Action', '')),
-            'version' : summary.setdefault('Version', ''), #TODO: can't find this field in chicago or oakland
-            #'contact' : None,
-            'sponsors' : legislation_attrs.get('Sponsors',''), #TODO: Oakland doesn't seem to enter sponsor info at this time
+            'version' : summary.setdefault('Version', ''),  # TODO: can't find this field in chicago or oakland
+            # 'contact' : None,
+            'sponsors' : legislation_attrs.get('Sponsors', ''),  # TODO: Oakland doesn't seem to enter sponsor info at this time
             # probably remove this from the model as well
             'minutes_url'  : None
         }
@@ -45,4 +45,15 @@ class OaklandHostedLegistarSiteWrapper (HostedLegistarSiteWrapper):
             attachments = []
 
         return attachments
+    
+    def pluck_action(self, key, action):
+        act = {
+            'key' : key,
+            'date_taken' : self.convert_date(action['Date']),
+            'acting_body' : action['Action By'],
+            'motion' : action['Result'],
+            'description' : action['Action'],
+            'notes' : ''
+        }
+        return act
 

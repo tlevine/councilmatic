@@ -70,14 +70,7 @@ class HostedLegistarSiteWrapper (object):
                 print summary
                 continue
             try:
-                action = {
-                    'key' : key,
-                    'date_taken' : self.convert_date(act['Date']),
-                    'acting_body' : act['Action By']['label'],
-                    'motion' : act['Result'],
-                    'description' : act['Status'],
-                    'notes' : ''
-                    }
+                action = self.pluck_action(key, act)
             except TypeError as e:
                 print e
                 print summary

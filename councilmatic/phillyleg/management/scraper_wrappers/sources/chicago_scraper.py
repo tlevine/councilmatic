@@ -49,3 +49,13 @@ class ChicogoHostedLegistarSiteWrapper (HostedLegistarSiteWrapper):
 
         return attachments
 
+    def pluck_action(self, key, action):
+        act = {
+            'key' : key,
+            'date_taken' : self.convert_date(action['Date']),
+            'acting_body' : action['Action By']['label'],
+            'motion' : action['Result'],
+            'description' : action['Status'],
+            'notes' : ''
+        }
+        return act
