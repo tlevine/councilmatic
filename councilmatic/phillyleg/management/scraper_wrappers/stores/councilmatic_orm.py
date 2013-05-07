@@ -116,8 +116,9 @@ class CouncilmaticDataStoreWrapper (object):
         for action_record in action_records:
             action_record = self.__replace_key_with_legfile(action_record)
             action_record = self.__replace_url_with_minutes(action_record)
-            if not self.is_duplicate_action(action_record):
-                self._save_or_ignore(LegAction, action_record)
+            if (action_record['date_taken']):
+                if not self.is_duplicate_action(action_record):
+                    self._save_or_ignore(LegAction, action_record)
 
     def is_duplicate_action(self, action_record):
         """
