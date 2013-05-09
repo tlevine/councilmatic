@@ -1,7 +1,7 @@
 
 from hosted_legistar_scraper import HostedLegistarSiteWrapper
 
-class ChicogoHostedLegistarSiteWrapper (HostedLegistarSiteWrapper):
+class ChicagoHostedLegistarSiteWrapper (HostedLegistarSiteWrapper):
     """
     A facade over the hosted legistar site data scraper, tuned for
     the legistar site as configured for Chicago.
