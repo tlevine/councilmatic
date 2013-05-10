@@ -23,6 +23,16 @@ DATABASES = {
 }
 
 ###############################################################################
+# 
+# The app needs email sending for registration and subscriptions
+#
+###############################################################################
+EMAIL_HOST=
+EMAIL_PORT=
+EMAIL_HOST_USER=
+EMAIL_HOST_PASSWORD=
+
+###############################################################################
 #
 # 3rd-party service configuration and keys
 #

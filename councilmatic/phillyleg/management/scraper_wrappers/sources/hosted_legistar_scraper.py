@@ -68,7 +68,7 @@ class HostedLegistarSiteWrapper (object):
             except (KeyError, AttributeError) as e:
                 print e
                 print summary
-                continue
+
             try:
                 action = self.pluck_action(key, act)
             except TypeError as e:
