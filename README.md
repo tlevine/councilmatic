@@ -11,7 +11,7 @@ Getting Started
 ---------------
 First check out the project code.
 
-    $ git clone git://github.com/codeforamerica/councilmatic.git
+    $ git clone https://github.com/guelo/councilmatic.git
 
 To work on your own instance of Councilmatic, you should first get Python
 installed. Follow the instructions for doing so on your platform.
