@@ -17,7 +17,6 @@ import sys
 
 from phillyleg.management.scraper_wrappers import CouncilmaticDataStoreWrapper
 from phillyleg.management.scraper_wrappers import PhillyLegistarSiteWrapper
-from utils import TooManyGeocodeRequests
 
 def import_leg_files(start_key, source, ds, save_key=False):
     """
@@ -89,12 +88,9 @@ class Command(BaseCommand):
 
         update_files = options['update_files']
 
-        try:
-            self._get_new_files()
-            if update_files:
-                self._get_updated_files()
-        except TooManyGeocodeRequests:
-            sys.exit(0)
+	self._get_new_files()
+        if update_files:
+            self._get_updated_files()
 
     def _get_updated_files(self):
         ds = self.ds
