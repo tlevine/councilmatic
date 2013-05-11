@@ -66,8 +66,7 @@ class HostedLegistarSiteWrapper (object):
             try:
                 act_details, act_votes = self.scraper.expandHistorySummary(act)
             except (KeyError, AttributeError) as e:
-                print e
-                print summary
+                log.debug('LegAction has no url')
 
             try:
                 action = self.pluck_action(key, act)

@@ -104,7 +104,6 @@ class CouncilmaticDataStoreWrapper (object):
 
         # Create notes attached to the record
         for attachment_record in attachment_records:
-            print attachment_record
             attachment_record = self.__replace_key_with_legfile(attachment_record)
             self._save_or_ignore(LegFileAttachment, attachment_record)
 
