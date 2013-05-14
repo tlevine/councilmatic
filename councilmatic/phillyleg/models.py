@@ -393,6 +393,7 @@ class LegFileMetaData (TimestampedModelMixin, models.Model):
     words = models.ManyToManyField('MetaData_Word', related_name='references_in_legislation')
     locations = models.ManyToManyField('MetaData_Location', related_name='references_in_legislation')
     topics = models.ManyToManyField('MetaData_Topic', related_name='references_in_legislation')
+    """ Additional groups, such as common strings found in legislation titles. """
     mentioned_legfiles = models.ManyToManyField('LegFile', related_name='references_in_legislation')
     
     def valid_locations(self):
