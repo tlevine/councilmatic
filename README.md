@@ -40,6 +40,13 @@ Copy the file *councilmatic/local_settings.py.template* to
 file.  By default, it is set up to scrape from Philadelphia's legislation
 system.
 
+You should also set other local overrides.  For example, for Oakland,
+set
+    TEMPLATE_DIRS = (
+        rel_path('cities/oakland/templates'),
+        rel_path('phillyleg'),
+        rel_path('templates'),
+    )
 
 ### Database
 
