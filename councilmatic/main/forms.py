@@ -1,4 +1,6 @@
 from django.core.urlresolvers import reverse
+from django.contrib.auth.forms import AuthenticationForm
+from django.utils.translation import ugettext_lazy as _
 import django.forms
 import haystack.forms
 import haystack.query
@@ -111,3 +113,22 @@ class FullSearchForm (haystack.forms.SearchForm):
                 sqs = sqs.filter(controlling_body__in=controlling_bodies)
 
         return sqs
+
+
+class ResendEmailAuthenticationForm(AuthenticationForm):
+    """
+    Extends the default login form to add resend password ability.
+
+    @param activation_link: An HTML re-send activation link to add to the "inactive" error
+    message.
+    @type activation_link: str or unicode
+    """
+    def __init__(self, *args, **kwargs):
+        self.activation_link = kwargs.get('activation_link', '')
+        self.error_messages = AuthenticationForm.error_messages.copy()
+        self.error_messages.update({
+            'inactive': _('This account is inactive. Please check your email and click on the activation link.')
+        })
+        self.session_key_inactive_username = 'inactive_username'
+        self.resend_activation_request_key = 'resend_activation'
+        super(ResendEmailAuthenticationForm, self).__init__(*args, **kwargs)

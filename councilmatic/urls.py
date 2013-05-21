@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import *
+from django.conf.urls import *
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 # Uncomment the next two lines to enable the admin:
@@ -15,6 +15,7 @@ import subscriptions.views
 import bookmarks.views
 import haystack.views
 import opinions.views
+from main.forms import ResendEmailAuthenticationForm
 
 urlpatterns = patterns(
     '',
@@ -30,9 +31,12 @@ urlpatterns = patterns(
     url(r'^admin/', admin.site.urls),
     url(r'^comments/', include('django.contrib.comments.urls')),
 
+    url(r'^login/$', 'main.views.login',
+        dict(authentication_form=ResendEmailAuthenticationForm), name='registration_login'),
+    url(r'^logout/$', 'django.contrib.auth.views.logout', name='comments-post-comment'),
+
+    # this needs to be below the login urls above, or it will override them.
     (r'^', include('registration.backends.default.urls')),
-    url(r'^login/$', 'django.contrib.auth.views.login', name='registration_login'),
-    url(r'^logout/$', 'django.contrib.auth.views.logout', name='registration_logout'),
 
     url(r'^social/', include('social_auth.urls')),
 
@@ -153,7 +157,7 @@ urlpatterns = patterns(
     # Flat pages
     url(r'about/',
         TemplateView.as_view(template_name='about.html'),
-        name='about')
+        name='about'),
 
 )
 

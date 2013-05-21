@@ -1,10 +1,15 @@
 import json
 import logging as log
 from django.contrib.syndication.views import Feed as DjangoFeed
+from django.contrib.sites.models import Site
+from django.contrib.auth.views import login as core_login
+from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
+from registration.models import RegistrationProfile
 from django.shortcuts import get_object_or_404
 from django.views import generic as views
 from haystack.query import SearchQuerySet
-
 from cm_api.resources import SubscriberResource
 from main import feeds
 from main import forms
@@ -16,6 +21,49 @@ import phillyleg.models
 import subscriptions.forms
 import subscriptions.models
 import subscriptions.views
+
+
+def login(request, *args, **kwargs):
+    """ Extends the default login view to add support for a "resend activation email"
+    link """
+    RESEND_REQUEST_KEY = 'resend'
+    INACTIVE_SESSION_KEY = 'inactive_user'
+
+    # process form with default login view
+    output = core_login(request, *args, **kwargs)
+
+    # login success
+    if isinstance(output, HttpResponseRedirect):
+        # remove session key in case another user logs in
+        if request.session.get(INACTIVE_SESSION_KEY, None):
+            del request.session[INACTIVE_SESSION_KEY]
+        return output
+
+    # login not successful
+    form = output.context_data.get('form', None)
+    """type: ResendEmailAuthenticationForm"""
+
+    # process resend activation email request if needed
+    resend = request.GET.get(RESEND_REQUEST_KEY) or \
+             request.POST.get(RESEND_REQUEST_KEY)
+    inactive_user = request.session.get(INACTIVE_SESSION_KEY, None)
+    if resend is not None and inactive_user is not None:
+        profiles = RegistrationProfile.objects.filter(user=inactive_user)
+        if len(profiles) is not 1:
+            return output  # todo: log warning
+        profile = profiles[0]
+        if not profile.activation_key_expired():
+            profile.send_activation_email(Site.objects.get_current())
+            output.context_data['resend_activation_sent'] = True
+        return output
+
+    # output resend activation email link if user is not active
+    user = form.get_user()
+    if user is not None and not user.is_active:
+        output.context_data['resend_activation_link'] = '%s?%s=%s' % (reverse('registration_login'), RESEND_REQUEST_KEY, 1)
+        request.session[INACTIVE_SESSION_KEY] = user.id
+
+    return output
 
 
 class NewLegislationFeed (DjangoFeed):

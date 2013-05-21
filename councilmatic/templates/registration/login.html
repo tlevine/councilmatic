@@ -13,6 +13,12 @@
       <h2>Log In...</h2>
       <form class="uniForm" method="POST" action="{% url registration_login %}">{% csrf_token %}
         <fieldset class="inlineLabels">
+            {% if resend_activation_link %}
+                <p class="notice resend_activation_link"><a href="{{ resend_activation_link }}">Resend activation email.</a></p>
+            {% endif %}
+            {% if resend_activation_sent %}
+                <p class="success resend_activation_sent"><strong>Resend activation link sent. Please check your email.</strong></p>
+            {% endif %}
         {{ form|as_uni_form }}
         <div class="buttonHolder">
           <button type="submit" class="primaryAction">Done</button>
