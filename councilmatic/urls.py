@@ -33,7 +33,7 @@ urlpatterns = patterns(
 
     url(r'^login/$', 'main.views.login',
         dict(authentication_form=ResendEmailAuthenticationForm), name='registration_login'),
-    url(r'^logout/$', 'django.contrib.auth.views.logout', name='comments-post-comment'),
+    url(r'^logout/$', 'django.contrib.auth.views.logout', name='registration_logout'),
 
     # this needs to be below the login urls above, or it will override them.
     (r'^', include('registration.backends.default.urls')),
