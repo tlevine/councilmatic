@@ -1,0 +1,160 @@
+import os
+
+# Make filepaths relative to settings.
+def rel_path(*subs):
+    """Make filepaths relative to this settings file"""
+    root_path = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(root_path, *subs)
+
+DEBUG = True
+COMPRESS_ENABLED = True
+TEMPLATE_DEBUG = DEBUG
+DO_DEBUG_TOOLBAR = True
+
+TIME_ZONE = 'America/Los_Angeles'
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.contrib.gis.db.backends.postgis', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': 'councilmatic',                      # Or path to database file if using sqlite3.
+        'USER': '**CHANGEME**',                      # Not used with sqlite3.
+        'PASSWORD': '**CHANGEME**',                  # Not used with sqlite3.
+        'HOST': 'localhost',                      # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '5432',                      # Set to empty string for default. Not used with sqlite3.
+    }
+}
+
+EMAIL_HOST='**CHANGEME**'
+EMAIL_PORT=26
+EMAIL_HOST_USER='**CHANGEME**'
+EMAIL_HOST_PASSWORD='**CHANGEME**'
+
+TEMPLATE_DIRS = (
+    rel_path('cities/oakland/templates'),
+    rel_path('phillyleg'),
+    rel_path('templates'),
+)
+
+###############################################################################
+#
+# 3rd-party service configuration and keys
+#
+
+TWITTER_CONSUMER_KEY         = ''
+TWITTER_CONSUMER_SECRET      = ''
+FACEBOOK_APP_ID              = ''
+FACEBOOK_API_SECRET          = ''
+LINKEDIN_CONSUMER_KEY        = ''
+LINKEDIN_CONSUMER_SECRET     = ''
+GOOGLE_CONSUMER_KEY          = ''
+GOOGLE_CONSUMER_SECRET       = ''
+
+RECAPTCHA_PUBLIC_KEY  = ''
+RECAPTCHA_PRIVATE_KEY = ''
+
+GOOGLE_ANALYTICS_ACCOUNT = ''
+
+###############################################################################
+#
+# Source Data
+#
+
+LEGISLATION = {
+    'SYSTEM': 'Daystar Insite',
+    'ROOT': 'http://oakland.legistar.com',
+    'STARTING_KEY': 72,
+    'ADDRESS_BOUNDS': [37.886, -122.362, 37.708, -122.101], # lat, lng, lat, lng
+    'ADDRESS_SUFFIX': ', Oakland, CA',
+
+    'SCRAPER': 'phillyleg.management.scraper_wrappers.sources.oakland_scraper.OaklandHostedLegistarSiteWrapper',
+    'SCRAPER_OPTIONS': {
+        'hostname': 'oakland.legistar.com',
+	'fulltext': False
+    },
+}
+
+###############################################################################
+#
+# Topic classifier
+#
+# Use this to set custom rules for classifying your legislation
+
+TOPIC_CLASSIFIER = lambda title: []
+
+
+###############################################################################
+#
+# Site search configuration
+#
+
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
+        'PATH': rel_path('whoosh_index'),
+    }
+}
+
+################################################################################
+#
+# Testing and administration
+#
+# Logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
+
+    'filters': {
+    },
+
+    'handlers': {
+        'null': {
+            'level':'DEBUG',
+            'class':'django.utils.log.NullHandler',
+        },
+        'console':{
+            'level':'INFO',
+            'class':'logging.StreamHandler',
+            'formatter':'verbose',
+        },
+        'logfile':{
+            'level':'DEBUG',
+            'class':'logging.handlers.RotatingFileHandler',
+            'filename':rel_path('logs/councilmatic.log'),
+            'formatter':'verbose',
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler',
+            'include_html': True,
+        }
+    },
+
+    'loggers': {
+        'django': {
+            'handlers':['null'],
+            'propagate': True,
+            'level':'INFO',
+        },
+        'django.request': {
+            'handlers': ['logfile', 'mail_admins'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'councilmatic': {
+            'handlers': ['console', 'logfile', 'mail_admins'],
+            'level': 'DEBUG',
+        },
+        'phillyleg.management': {
+            'handlers': ['console', 'logfile', 'mail_admins'],
+            'level': 'DEBUG',
+        },
+    }
+}
