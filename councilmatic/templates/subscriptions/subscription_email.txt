@@ -1,6 +1,6 @@
 {% load subscription_labels %}
 {% load url from future %}
-Philadelphia Councilmatic!
+Councilmatic
 ==========================
 
 You are subscribed to the following feeds:
