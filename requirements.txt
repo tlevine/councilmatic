@@ -71,7 +71,7 @@ git+git://github.com/mjumbewu/django-recaptcha.git#egg=django-recaptcha
 requests==0.11.1
 
 # Scraping
-git+git://github.com/fgregg/legistar-scrape#egg=legistar-scrape
+git+git://github.com/guelo/legistar-scrape#egg=legistar-scrape
 BeautifulSoup
 BeautifulSoup4
 pdfminer

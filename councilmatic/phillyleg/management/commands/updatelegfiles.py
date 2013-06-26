@@ -1,19 +1,17 @@
 ###############################################################################
 # This will collect the latest legislative filings released in the city of
-# Philadelphia.
+#
 ###############################################################################
 
 #will send out daily email for users - first will read all keywords
 #create text files, then email text files to all each user subscribed.
 
 from django.conf import settings
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.importlib import import_module
-import django
 import logging
 import optparse
-import sys
 
 from phillyleg.management.scraper_wrappers import CouncilmaticDataStoreWrapper
 from phillyleg.management.scraper_wrappers import PhillyLegistarSiteWrapper
@@ -38,7 +36,7 @@ def import_leg_files(start_key, source, ds, save_key=False):
             ds.save_continuation_key(curr_key)
 
 
-def load_scraper():
+def load_scraper(cmdline_options):
     scraper_name = settings.LEGISLATION['SCRAPER']
     module, attr = scraper_name.rsplit('.', 1)
 
@@ -53,7 +51,7 @@ def load_scraper():
         raise ImproperlyConfigured('Error importing legislation scraper %s: "%s"' % (scraper_name, e))
 
     options = settings.LEGISLATION['SCRAPER_OPTIONS']
-    return ScraperWrapper(**options)
+    return ScraperWrapper(cmdline_options, **options)
 
 
 class Command(BaseCommand):
@@ -64,6 +62,10 @@ class Command(BaseCommand):
                 dest='update_files',
                 default=False,
                 help='Update existing files as well'),
+            optparse.make_option('--year',
+                action='store',
+                dest='year',
+                help='specify a year of legislation to search and scrape'),
             )
 
 
@@ -73,7 +75,7 @@ class Command(BaseCommand):
 
         # Create a datastore wrapper object
         ds = self.ds = CouncilmaticDataStoreWrapper()
-        source = self.source = load_scraper()
+        source = self.source = load_scraper(options)
 
         # Seed the PDF cache with already-downloaded content.
         #
@@ -88,7 +90,7 @@ class Command(BaseCommand):
 
         update_files = options['update_files']
 
-	self._get_new_files()
+        self._get_new_files()
         if update_files:
             self._get_updated_files()
 

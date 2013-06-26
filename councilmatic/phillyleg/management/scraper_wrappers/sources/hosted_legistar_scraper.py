@@ -11,6 +11,7 @@ import pdb
 
 from legistar.scraper import LegistarScraper
 from legistar.config import Config, DEFAULT_CONFIG
+from coverage import cmdline
 
 log = logging.getLogger(__name__)
 
@@ -20,6 +21,7 @@ class HostedLegistarSiteWrapper (object):
     A generic facade over hosted legistar site data scraper.
     It is responsible for interpreting data scraped out of the site by LegistarScraper.
     The main external point of interaction is scrape_legis_file.
+    
     NOTE that this is a superclass that will not run by itself and isn't
     meant to be; you are expected to run a subclass that implements
     some functions with names starting with "pluck".
@@ -27,9 +29,12 @@ class HostedLegistarSiteWrapper (object):
     requires: BeautifulSoup, mechanize
     """
 
-    def __init__(self, **options):
+    def __init__(self, cmdline_options, **options):
         self.scraper = LegistarScraper(options)
-        self.legislation_summaries =  self.scraper.searchLegislation('')
+        if cmdline_options['year']:
+          self.legislation_summaries =  self.scraper.searchLegislation('',year=cmdline_options['year'])
+        else:
+          self.legislation_summaries =  self.scraper.searchLegislation('')
 
     def scrape_legis_file(self, key, summary):
         '''Extract a record from the given document (soup). The key is for the
