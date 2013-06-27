@@ -10,6 +10,9 @@ from registration.models import RegistrationProfile
 from django.shortcuts import get_object_or_404
 from django.views import generic as views
 from haystack.query import SearchQuerySet
+import datetime
+from datetime import timedelta
+
 from cm_api.resources import SubscriberResource
 from main import feeds
 from main import forms
@@ -116,7 +119,7 @@ class BaseDashboardMixin (SearchBarMixin,
 
     def get_recent_legislation(self):
         legfiles = self.get_filtered_legfiles()
-        return list(legfiles.exclude(title='').order_by('-key')[:3])
+        return list(legfiles.exclude(metadata__topics__topic='Routine').order_by('-key')[:6])
 
     def get_context_data(self, **kwargs):
         search_form = forms.FullSearchForm()
@@ -149,10 +152,111 @@ class AppDashboardView (BaseDashboardMixin,
                        all().filter(valid=True).order_by('-pk')[:10].\
                        prefetch_related('references_in_legislation'))
 
+    def get_routine_topics(self):
+        return list(phillyleg.models.MetaData_Topic.objects.all().\
+                    filter(topic__in=['Routine', 'Non-Routine']).order_by('topic'))
+
+    def get_parent_topics(self):
+        return list(phillyleg.models.MetaData_Topic.objects.all().\
+                    filter(parent_id__isnull=True).exclude(topic__in=['Routine', 'Non-Routine']).order_by('topic'))
+
+    def get_sponsors(self):
+        return list(phillyleg.models.CouncilMember.objects.all())
+
+    def get_sponsor_leg_count(self, sponsor):
+        now = datetime.date.today()
+        one_month = datetime.timedelta(days=31)
+        date_string = now-one_month
+        return phillyleg.models.LegFile.objects.filter(sponsors__id=sponsor.id, intro_date__gte=date_string).count()
+
+    def get_topic_leg_count(self, topic):
+        now = datetime.date.today()
+        one_month = datetime.timedelta(days=31)
+        date_string = now-one_month
+        return phillyleg.models.LegFile.objects.filter(metadata__topics__id=topic.id, intro_date__gte=date_string).count()
+
+    def get_topic_children(self, topic):
+        children_topics_query = list(phillyleg.models.MetaData_Topic.objects.all().filter(parent_id=topic.id).order_by('topic'))
+        children_topics = []
+
+        if children_topics_query.count == 0:
+            return
+
+        for t in children_topics_query:
+            leg_count = self.get_topic_leg_count(t)
+            if leg_count > 0:
+                children = self.get_topic_children(t)
+                children_topics.append({'id': t.id, 'topic': t.topic, 'leg_count': leg_count, 'children': children})
+
+        children_topics_sorted = sorted(children_topics, key=lambda k: k['leg_count'], reverse=True)
+        return children_topics_sorted
+
     def get_context_data(self, **kwargs):
-        locations = self.get_recent_locations()
+
+        # routine / non-routine
+        routine_topics_query = self.get_routine_topics()
+        routine_topics = []
+
+        for t in routine_topics_query:
+            leg_count = self.get_topic_leg_count(t)
+            routine_topics.append({'id': t.id, 'topic': t.topic, 'leg_count': leg_count})
+
+        # topics list
+        parent_topics_query = self.get_parent_topics()
+        recent_topics = []
+
+        for t in parent_topics_query:
+            leg_count = self.get_topic_leg_count(t)
+            if leg_count > 0:
+                children = self.get_topic_children(t)
+                recent_topics.append({'id': t.id, 'topic': t.topic, 'leg_count': leg_count, 'children': children})
+
+        recent_topics_sorted = sorted(recent_topics, key=lambda k: k['leg_count'], reverse=True)
+
+        # sponsors list
+        sponsors_query = self.get_sponsors()
+        sponsors = []
+
+        for s in sponsors_query:
+            leg_count = self.get_sponsor_leg_count(s)
+            if leg_count > 0:
+                sponsors.append({'id': s.id, 'name': s.name, 'title': s.title, 'headshot': s.headshot, 'leg_count': leg_count})
+
+        sponsors_sorted = sorted(sponsors, key=lambda k: k['leg_count'], reverse=True)[:5]
+
         context_data = super(AppDashboardView, self).get_context_data(**kwargs)
-        context_data['locations'] = locations
+        context_data['recent_topics'] = recent_topics_sorted
+        context_data['routine_topics'] = routine_topics
+        context_data['sponsors'] = sponsors_sorted
+
+        log.debug(context_data)        
+
+        return context_data
+
+class CouncilMembersView(views.TemplateView):
+    template_name = 'councilmatic/councilmembers.html'
+
+    def get_councilmembers(self):
+        return phillyleg.models.CouncilMember.objects.\
+               filter(title__icontains='alderman').\
+               exclude(title__icontains='former').order_by('name')
+
+    def get_former_councilmembers(self):
+        return phillyleg.models.CouncilMember.objects.\
+               filter(title__icontains='former').\
+               order_by('name')
+
+    def get_other_councilmembers(self):
+        return phillyleg.models.CouncilMember.objects.\
+               exclude(title__icontains='former').exclude(title__icontains='alderman').\
+               order_by('name')
+
+
+    def get_context_data(self, **kwargs):
+        context_data = super(CouncilMembersView, self).get_context_data(**kwargs)
+        context_data['councilmembers'] = self.get_councilmembers()
+        context_data['former_councilmembers'] = self.get_former_councilmembers()
+        context_data['other_councilmembers'] = self.get_other_councilmembers()
         return context_data
 
 
@@ -171,10 +275,59 @@ class CouncilMemberDetailView (BaseDashboardMixin,
     def get_district(self):
         return self.object.district
 
+    def get_routine_topics(self):
+        return list(phillyleg.models.MetaData_Topic.objects.all().\
+                    filter(topic__in=['Routine', 'Non-Routine']).order_by('topic'))
+
+    def get_parent_topics(self):
+        return list(phillyleg.models.MetaData_Topic.objects.all().\
+                    filter(parent_id__isnull=True).exclude(topic__in=['Routine', 'Non-Routine']).order_by('topic'))
+
+    def get_topic_leg_count(self, topic):
+        return phillyleg.models.LegFile.objects.filter(metadata__topics__id=topic.id, sponsors__id=self.object.id).count()
+
+    def get_topic_children(self, topic):
+        children_topics_query = list(phillyleg.models.MetaData_Topic.objects.all().filter(parent_id=topic.id).order_by('topic'))
+        children_topics = []
+
+        if children_topics_query.count == 0:
+            return
+
+        for t in children_topics_query:
+            leg_count = self.get_topic_leg_count(t)
+            if leg_count > 0:
+                children = self.get_topic_children(t)
+                children_topics.append({'id': t.id, 'topic': t.topic, 'leg_count': leg_count, 'children': children})
+
+        children_topics_sorted = sorted(children_topics, key=lambda k: k['leg_count'], reverse=True)
+        return children_topics_sorted
+
     def get_context_data(self, **kwargs):
         district = self.get_district()
         context_data = super(CouncilMemberDetailView, self).get_context_data(**kwargs)
         context_data['district'] = district
+
+        # routine / non-routine
+        routine_topics_query = self.get_routine_topics()
+        routine_topics = []
+
+        for t in routine_topics_query:
+            leg_count = self.get_topic_leg_count(t)
+            routine_topics.append({'id': t.id, 'topic': t.topic, 'leg_count': leg_count})
+
+        parent_topics_query = self.get_parent_topics()
+        recent_topics = []
+
+        for t in parent_topics_query:
+            leg_count = self.get_topic_leg_count(t)
+            if leg_count > 0:
+                children = self.get_topic_children(t)
+                recent_topics.append({'id': t.id, 'topic': t.topic, 'leg_count': leg_count, 'children': children})
+
+        recent_topics_sorted = sorted(recent_topics, key=lambda k: k['leg_count'], reverse=True)
+
+        context_data['recent_topics'] = recent_topics_sorted
+        context_data['routine_topics'] = routine_topics
         return context_data
 
 
@@ -182,12 +335,12 @@ class SearcherMixin (object):
     def _init_haystack_searchview(self, request):
         # Construct and run a haystack SearchView so that we can use the
         # resulting values.
-        self.search_view = haystack.views.SearchView(form_class=forms.FullSearchForm, searchqueryset=SearchQuerySet().order_by('-order_date'))
+        self.search_view = haystack.views.SearchView(form_class=forms.FullSearchForm, searchqueryset=SearchQuerySet())
         self.search_view.request = request
 
         self.search_view.form = self.search_view.build_form()
         self.search_view.query = self.search_view.get_query()
-        self.search_view.results = self.search_view.get_results()
+        self.search_view.results = self.search_view.get_results().order_by('-order_date')
 
     def _get_search_results(self, query_params):
         if len(query_params) == 0:
@@ -235,6 +388,7 @@ class LegFileListFeedView (SearcherMixin, DjangoFeed):
 class SearchView (SearcherMixin,
                   SearchBarMixin,
                   subscriptions.views.SingleSubscriptionMixin,
+                  bookmarks.views.BaseBookmarkMixin,
                   views.ListView):
     template_name = 'councilmatic/search.html'
     paginate_by = 20
@@ -295,6 +449,14 @@ class SearchView (SearcherMixin,
                 page_urls.append((page_num, url))
             context['page_urls'] = page_urls
 
+        # legfiles = self.get_queryset()
+        # bookmark_data = self.get_bookmarks_data(legfiles)
+        # bookmark_cache_key = self.get_bookmarks_cache_key(bookmark_data)
+
+        # context['bookmark_data'] = bookmark_data
+        # context['bookmark_cache_key'] = bookmark_cache_key
+        context['hide_bookmarks'] = True
+
         log.debug(context)
         return context
 
@@ -346,7 +508,8 @@ class LegislationDetailView (SearchBarMixin,
                    .prefetch_related('actions', 'attachments', 'sponsors',
                                      'references_in_legislation',
                                      'metadata__locations',
-                                     'metadata__mentioned_legfiles')
+                                     'metadata__mentioned_legfiles',
+                                     'metadata__topics')
 
     def get_content_feed(self):
         legfile = self.object

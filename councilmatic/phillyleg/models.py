@@ -28,6 +28,7 @@ class LegKeys(models.Model):
 
 class CouncilMember(TimestampedModelMixin, models.Model):
     name = models.CharField(max_length=100)
+    title = models.CharField(max_length=255, default='')
     headshot = models.CharField(max_length=255,
         # Path to councilmember image, relative to static files dir
         default='phillyleg/noun_project_416.png')
@@ -67,6 +68,15 @@ class CouncilMember(TimestampedModelMixin, models.Model):
     def is_at_large(self):
         tenure = self.tenure
         return (tenure is not None and tenure.at_large)
+
+    def leg_count(self):
+        return LegFile.objects.filter(sponsors__id=self.id).count()
+
+    def recent_leg_count(self):
+        now = datetime.date.today()
+        one_month = datetime.timedelta(days=31)
+        date_string = now-one_month
+        return LegFile.objects.filter(sponsors__id=self.id, intro_date__gte=date_string).count()
 
     def __unicode__(self):
         return self.name.lstrip("Councilmember")
@@ -124,6 +134,7 @@ class LegFile(TimestampedModelMixin, models.Model):
     type = models.CharField(max_length=1000)
     url = models.URLField()
     version = models.CharField(max_length=100)
+    is_routine = models.BooleanField(default=True, blank=True)
 
     class Meta:
         ordering = ['-key']
@@ -198,6 +209,14 @@ class LegFile(TimestampedModelMixin, models.Model):
 
     def topics(self):
         return settings.TOPIC_CLASSIFIER(self.title)
+
+    def get_status_label(self):
+        if self.status in ['Adopted', 'Approved', 'Direct Introduction', 'Passed'] :
+           return 'label-success'
+        elif self.status in ['Failed to Pass', 'Vetoed'] :
+           return 'label-important'
+        else :
+           return 'label-inverse'
 
     def mentioned_legfiles(self):
         """
@@ -319,6 +338,14 @@ class LegAction(TimestampedModelMixin, models.Model):
         #       http://legislation.phila.gov/detailreport/?key=2915
         unique_together = (('file','date_taken','description','notes'),)
         ordering = ['date_taken']
+
+    def get_label(self):
+	if self.description in ['Adopted', 'Approved', 'Direct Introduction', 'Passed'] :
+	  return 'label-success'
+        elif self.description in ['Failed to Pass', 'Vetoed'] :
+	  return 'label-important'
+	else :
+	  return 'label-inverse'
 
 
 class LegMinutes(TimestampedModelMixin, models.Model):
@@ -452,6 +479,16 @@ class MetaData_Location (TimestampedModelMixin, models.Model):
 
 class MetaData_Topic (models.Model):
     topic = models.CharField(max_length=128, unique=True)
+    parent_id = models.ForeignKey('self', null=True)
 
+    class Meta:
+        ordering = ['topic']
+
+    def get_label(self):
+	if self.topic == 'Non-Routine' :
+	    return 'label-info'
+	else :
+	    return 'label-inverse'
+    
     def __unicode__(self):
-        return '%r (topics: %s)' % (self.topic, len(self.references.all()))
+        return self.topic

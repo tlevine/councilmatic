@@ -9,16 +9,22 @@ import uni_form.helpers as helpers
 
 def legfile_choices(field):
     from phillyleg.models import LegFile
-    value_objs = LegFile.objects.values(field).distinct()
-    values = set((value_obj[field], value_obj[field])
-              for value_obj in value_objs)
+    value_objs = LegFile.objects.values(field).distinct().order_by(field)
+    values = [(value_obj[field], value_obj[field])
+              for value_obj in value_objs]
     return values
 
 
 def councilmember_choices():
     from phillyleg.models import CouncilMember
-    values = set((member.name, member.name)
-              for member in CouncilMember.objects.all())
+    values = [(member.name, member.name)
+              for member in CouncilMember.objects.all().order_by('name')]
+    return values
+
+def topic_choices():
+    from phillyleg.models import MetaData_Topic
+    values = [(topic.topic, topic.topic)
+              for topic in MetaData_Topic.objects.all().order_by('topic')]
     return values
 
 
@@ -48,6 +54,11 @@ class SimpleSearchForm (haystack.forms.SearchForm):
         return sqs
 
 class FullSearchForm (haystack.forms.SearchForm):
+    topics = django.forms.MultipleChoiceField(
+        choices=topic_choices(),
+        widget=django.forms.CheckboxSelectMultiple(),
+        label="Narrow by topics &raquo;",
+        required=False)
     statuses = django.forms.MultipleChoiceField(
         choices=legfile_choices('status'),
         widget=django.forms.CheckboxSelectMultiple(),
@@ -92,6 +103,7 @@ class FullSearchForm (haystack.forms.SearchForm):
 
         if self.is_valid():
             query = self.cleaned_data['q']
+            topics = self.cleaned_data['topics']
             statuses = self.cleaned_data['statuses']
             sponsor_names = self.cleaned_data['sponsors']
             file_types = self.cleaned_data['file_types']
@@ -99,6 +111,9 @@ class FullSearchForm (haystack.forms.SearchForm):
 
             if not query:
                 sqs = haystack.query.SearchQuerySet().all()
+
+            if topics:
+                sqs = sqs.filter(topics__in=topics)
 
             if statuses:
                 sqs = sqs.filter(status__in=statuses)

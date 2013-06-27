@@ -1,11 +1,8 @@
-Councilmatic! [![Build Status](https://travis-ci.org/codeforamerica/councilmatic.png)](http://travis-ci.org/codeforamerica/councilmatic)
-=============
-Legislative Subscription Service.
+Oakland Councilmatic!
+=====================
+City Council Legislative Subscription Service.
 
-Contact Us
-----------
-- Join the mailing list at https://groups.google.com/group/councilmatic/
-- Find us on irc.freenode.net in the #councilmatic room
+This is a fork of Councilmatic to port it for Oakland.
 
 Getting Started
 ---------------
@@ -94,6 +91,4 @@ you supplied and you should have access to all of the legislative files!
 Copyright
 ---------
 Copyright (c) 2010 Code for America Laboratories
-See [LICENSE](https://github.com/cfalabs/open311/blob/master/LICENSE.mkd) for details.
-
-[![Code for America Tracker](http://stats.codeforamerica.org/codeforamerica/philly_legislative.png)](http://stats.codeforamerica.org/projects/philly_legislative)
+See [LICENSE](https://github.com/codeforamerica/open311/blob/master/LICENSE.md) for details.

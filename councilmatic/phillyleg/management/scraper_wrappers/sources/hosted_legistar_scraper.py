@@ -74,11 +74,17 @@ class HostedLegistarSiteWrapper (object):
                 log.debug('LegAction has no url')
 
             try:
+
                 action = self.pluck_action(key, act)
             except TypeError as e:
                 print e
                 print summary
                 continue
+            except KeyError as e :
+                print act
+                print e
+                print summary
+                raise
             actions.append(action)
 
         # we should probably remove this from the model since the hosted
