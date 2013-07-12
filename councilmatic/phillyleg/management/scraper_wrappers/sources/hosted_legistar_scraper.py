@@ -68,14 +68,17 @@ class HostedLegistarSiteWrapper (object):
 
         actions = []
         for act in legislation_history :
+            act_details = act_votes = []
             try:
                 act_details, act_votes = self.scraper.expandHistorySummary(act)
             except (KeyError, AttributeError) as e:
                 log.debug('LegAction has no url')
-
+            else:
+              if act_votes:
+                print "act_votes", act_votes
+              
             try:
-
-                action = self.pluck_action(key, act)
+                action = self.pluck_action(key, act, act_details, act_votes)
             except TypeError as e:
                 print e
                 print summary

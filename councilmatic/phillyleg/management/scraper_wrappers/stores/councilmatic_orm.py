@@ -1,5 +1,3 @@
-import datetime
-import phillyleg
 from django.db import transaction
 from django.db.utils import IntegrityError
 
@@ -115,14 +113,28 @@ class CouncilmaticDataStoreWrapper (object):
         for action_record in action_records:
             action_record = self.__replace_key_with_legfile(action_record)
             action_record = self.__replace_url_with_minutes(action_record)
-            if (action_record['date_taken']):
-                if not self.is_duplicate_action(action_record):
-                    self._save_or_ignore(LegAction, action_record)
 
-    def is_duplicate_action(self, action_record):
+            votes = details = []            
+            if 'votes' in action_record:
+                votes = action_record.pop('votes')
+            if 'details' in action_record:
+                details = action_record.pop('votes')
+            if (action_record['date_taken']):
+                legAction = self.fetch_LegAction_from_db(action_record)
+                if not legAction: # it's a new legAction, let's save it
+                    legAction = self._save_or_ignore(LegAction, action_record)
+                for vote in votes:
+                    vote['legaction'] = legAction
+                    cm_name = vote.pop('cm_name')
+                    council_member, created = CouncilMember.objects.get_or_create(name=cm_name)
+                    vote['councilmember'] = council_member
+                    self._save_or_ignore(ActionVote, vote)
+                    
+                                
+
+    def fetch_LegAction_from_db(self, action_record):
         """
-        Check whether the given action_record data already exists in the
-        database.
+        
         """
         date_taken = action_record.get('date_taken')
         legfile = action_record.get('file')
@@ -131,9 +143,9 @@ class CouncilmaticDataStoreWrapper (object):
         for action in actions:
             if action.description == action_record.get('description') and \
                action.notes == action_record.get('notes'):
-                return True
+                return action
 
-        return False
+        return None
 
     @property
     def pdf_mapping(self):
@@ -162,6 +174,7 @@ class CouncilmaticDataStoreWrapper (object):
         return file_record
 
     __legfile_cache = {}
+    
     def __replace_key_with_legfile(self, record):
         key = record['key']
 
@@ -206,8 +219,9 @@ class CouncilmaticDataStoreWrapper (object):
             sid = transaction.savepoint()
             model_instance.save()
             transaction.savepoint_commit(sid)
-            return True
+            
         except IntegrityError:
             # If it's a duplicate, don't worry about it.  Just move on.
             transaction.savepoint_rollback(sid)
-            return False
+            
+        return model_instance

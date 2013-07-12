@@ -49,7 +49,7 @@ class ChicagoHostedLegistarSiteWrapper (HostedLegistarSiteWrapper):
 
         return attachments
 
-    def pluck_action(self, key, action):
+    def pluck_action(self, key, action, act_details, act_votes):
         act = {
             'key' : key,
             'date_taken' : self.convert_date(action['Date']),

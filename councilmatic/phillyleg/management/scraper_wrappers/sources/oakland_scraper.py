@@ -22,6 +22,7 @@ class OaklandHostedLegistarSiteWrapper (HostedLegistarSiteWrapper):
             'type' : summary['Type'],
             'status' : summary['Status'],
             'title' : summary['Title'],
+            'name' : legislation_attrs['Name'],
             'controlling_body' : legislation_attrs['In control'],
             'intro_date' : self.convert_date(legislation_attrs['File created']),
             'final_date' : self.convert_date(summary.setdefault('Final Action', '')),
@@ -46,7 +47,7 @@ class OaklandHostedLegistarSiteWrapper (HostedLegistarSiteWrapper):
 
         return attachments
     
-    def pluck_action(self, key, action):
+    def pluck_action(self, key, action, act_details, act_votes):
         act = {
             'key' : key,
             'date_taken' : self.convert_date(action['Date']),
@@ -55,5 +56,14 @@ class OaklandHostedLegistarSiteWrapper (HostedLegistarSiteWrapper):
             'description' : action['Action'],
             'notes' : ''
         }
+        
+        if act_votes:
+            act['votes'] = []
+            for vote in act_votes:
+                act['votes'].append({
+                                  'vote':vote['Vote'], 
+                                  'cm_name':vote['Person Name']
+                              })
+                
         return act
 

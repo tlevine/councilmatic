@@ -135,6 +135,7 @@ class LegFile(TimestampedModelMixin, models.Model):
     url = models.URLField()
     version = models.CharField(max_length=100)
     is_routine = models.BooleanField(default=True, blank=True)
+    name = models.TextField(null=True, blank=True)
 
     class Meta:
         ordering = ['-key']
@@ -340,13 +341,22 @@ class LegAction(TimestampedModelMixin, models.Model):
         ordering = ['date_taken']
 
     def get_label(self):
-	if self.description in ['Adopted', 'Approved', 'Direct Introduction', 'Passed'] :
-	  return 'label-success'
-        elif self.description in ['Failed to Pass', 'Vetoed'] :
-	  return 'label-important'
-	else :
-	  return 'label-inverse'
+      if self.description in ['Adopted', 'Approved', 'Direct Introduction', 'Passed'] :
+        return 'label-success'
+      elif self.description in ['Failed to Pass', 'Vetoed'] :
+        return 'label-important'
+      else :
+        return 'label-inverse'
 
+class ActionVote(TimestampedModelMixin, models.Model):
+    vote = models.CharField(max_length=30)
+    councilmember = models.ForeignKey(CouncilMember)
+    legaction = models.ForeignKey(LegAction) 
+    
+    class Meta:
+        unique_together = ('legaction','councilmember')
+
+    
 
 class LegMinutes(TimestampedModelMixin, models.Model):
     url = models.URLField(unique=True)
