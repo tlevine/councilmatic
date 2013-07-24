@@ -48,9 +48,9 @@
 	</p>
 
         <h4>Actions</h4>
-        {% for action in object.actions.all %}
+        {% for action in object.actions.all|dictsortreversed:"date_taken" %}
 
-            {% if forloop.first %}<ul class='unstyled'>{% endif %}
+            {% if forloop.first %}<ul>{% endif %}
                 <li>
                     {% if action.minutes.url %}
                     {% ifchanged action.minutes.url %}
@@ -66,9 +66,22 @@
                     by
 		    {{ action.acting_body }}
                     {% if action.notes %} {{ action.notes }} {% endif %}
+                    
+            {% for vote in action.votes.all %}
+                {% if forloop.first %}
+                    <table>
+                    <th>Votes</th>
+                {% endif %}
+                <tr>
+                    <td><a href='/member/{{vote.councilmember.id}}'>{{ vote.councilmember }}</a></td>
+                    <td>{{ vote.vote }}</td>
+                </tr>
+                {% if forloop.last %}</table><p>{% endif %}
+            {% endfor %}
+                    
                 </li>
             {% if forloop.last %}</ul>{% endif %}
-
+            
         {% empty %}
 
           <p>(No actions taken)</p>

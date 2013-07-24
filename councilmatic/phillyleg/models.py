@@ -351,7 +351,7 @@ class LegAction(TimestampedModelMixin, models.Model):
 class ActionVote(TimestampedModelMixin, models.Model):
     vote = models.CharField(max_length=30)
     councilmember = models.ForeignKey(CouncilMember)
-    legaction = models.ForeignKey(LegAction) 
+    legaction = models.ForeignKey(LegAction, related_name='votes') 
     
     class Meta:
         unique_together = ('legaction','councilmember')
