@@ -17,12 +17,12 @@
 </p>
 <p>{{ file.title|truncatewords:25 }}</p>
 
-<p> Sponsored by: 
 {% for sponsor in file.sponsors.all %}
-  <a href="/member/{{ sponsor.id }}">{{ sponsor.name }}</a>
-  {% if not forloop.last %},{% endif %}
+  {% if forloop.first %}<p> Sponsored by:{% endif %}
+  <a href="/member/{{ sponsor.id }}">{{ sponsor.name }}d</a>
+  {% if not forloop.last %},{% else %}</p>{% endif %}
+  
 {% endfor %}
-</p>
 
 <p>
 {% for topic in file.metadata.topics.all %}
