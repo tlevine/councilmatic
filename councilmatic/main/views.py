@@ -238,7 +238,7 @@ class CouncilMembersView(views.TemplateView):
 
     def get_councilmembers(self):
         return phillyleg.models.CouncilMember.objects.\
-               filter(title__icontains='alderman').\
+               filter(title__icontains='councilmember').\
                exclude(title__icontains='former').\
                exclude(title__icontains='ignore').order_by('name')
 
@@ -250,7 +250,7 @@ class CouncilMembersView(views.TemplateView):
     def get_other_councilmembers(self):
         return phillyleg.models.CouncilMember.objects.\
                exclude(title__icontains='former').\
-               exclude(title__icontains='alderman').\
+               exclude(title__icontains='councilmember').\
                exclude(title__icontains='ignore').order_by('name')
 
 
