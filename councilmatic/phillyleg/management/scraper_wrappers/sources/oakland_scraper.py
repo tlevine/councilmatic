@@ -1,5 +1,6 @@
 
 from hosted_legistar_scraper import HostedLegistarSiteWrapper
+import re
 
 class OaklandHostedLegistarSiteWrapper (HostedLegistarSiteWrapper):
     """
@@ -32,6 +33,12 @@ class OaklandHostedLegistarSiteWrapper (HostedLegistarSiteWrapper):
             # probably remove this from the model as well
             'minutes_url'  : None
         }
+        
+        if not record['sponsors'] :
+            p = re.search('From:\s*(.*)',record['title'])
+            if p:
+                record['froms'] = "%s" % p.group(1)
+          
         return record
 
     def pluck_attachments(self, key, legislation_attrs):

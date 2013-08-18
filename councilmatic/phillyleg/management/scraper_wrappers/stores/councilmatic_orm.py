@@ -2,6 +2,7 @@ from django.db import transaction
 from django.db.utils import IntegrityError
 
 from phillyleg.models import *
+import re
 
 class CouncilmaticDataStoreWrapper (object):
     """
@@ -69,6 +70,17 @@ class CouncilmaticDataStoreWrapper (object):
         # insert each sponsor individually.  See below in 'Create the record'.
         sponsor_names = file_record['sponsors']
         del file_record['sponsors']
+        
+        if not sponsor_names and file_record.get('froms'):
+            print file_record['froms']
+            cms = CouncilMember.objects.all()
+            for cm in cms:
+                cm_lastname = cm.name.rsplit(None, 1)[-1]  
+                p = re.search(cm_lastname, file_record['froms'])
+                if p:
+                    sponsor_names.append(cm.name)
+                    
+            
 
         # Create the record
         try:
