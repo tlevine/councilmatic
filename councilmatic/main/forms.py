@@ -5,12 +5,19 @@ import django.forms
 import haystack.forms
 import haystack.query
 import uni_form.helpers as helpers
+import logging as log
 
 
-def legfile_choices(field):
+
+def legfile_choices(field, excludeString=None):
     from phillyleg.models import LegFile
     value_objs = LegFile.objects.values(field).distinct().order_by(field)
-    values = [(value_obj[field], value_obj[field])
+    
+    if (excludeString):
+      values = [(value_obj[field], value_obj[field])
+              for value_obj in value_objs if excludeString not in value_obj[field]]
+    else :
+      values = [(value_obj[field], value_obj[field])
               for value_obj in value_objs]
     return values
 
@@ -18,7 +25,7 @@ def legfile_choices(field):
 def councilmember_choices():
     from phillyleg.models import CouncilMember
     values = [(member.name, member.name)
-              for member in CouncilMember.objects.all().order_by('name')]
+              for member in CouncilMember.objects.all().order_by('name') if 'ignore' not in member.title.lower()]
     return values
 
 def topic_choices():
@@ -70,7 +77,7 @@ class FullSearchForm (haystack.forms.SearchForm):
         label="Narrow by controlling body &raquo;",
         required=False)
     file_types = django.forms.MultipleChoiceField(
-        choices=legfile_choices('type'),
+        choices=legfile_choices('type', 'Defunct'),
         widget=django.forms.CheckboxSelectMultiple(),
         label="Narrow by type of legislation &raquo;",
         required=False)
