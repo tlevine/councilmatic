@@ -1,6 +1,8 @@
 
 from hosted_legistar_scraper import HostedLegistarSiteWrapper
 import re
+from councilmatic.phillyleg.models import CouncilMember, CouncilMemberTenure
+import datetime
 
 class OaklandHostedLegistarSiteWrapper (HostedLegistarSiteWrapper):
     """
@@ -37,9 +39,44 @@ class OaklandHostedLegistarSiteWrapper (HostedLegistarSiteWrapper):
         if not record['sponsors'] :
             p = re.search('From:\s*(.*)',record['title'])
             if p:
-                record['froms'] = "%s" % p.group(1)
-          
+                froms = "%s" % p.group(1)
+                record['sponsors'] = self._getSponsorsFromFroms(froms, record)          
         return record
+
+
+    def _lookup_officeholder(self, title, date):
+        for tenure in CouncilMemberTenure.objects.filter(title__contains=title, begin__lt=date):
+            tenureend = datetime.date.max
+            if tenure.end:
+                tenureend = tenure.end
+            if tenureend > date:
+                return tenure.councilmember.name
+        
+
+    def _getSponsorsFromFroms(self, froms, record):
+        cms = CouncilMember.objects.all()
+        sponsor_names = []
+        for cm in cms:
+            cm_lastname = cm.name.rsplit(None, 1)[-1]  
+            if re.search(cm_lastname, froms):
+                sponsor_names.append(cm.name)
+                
+        if re.search('(?<!Vice).Mayor', froms):
+            sponsor_names.append(self._lookup_officeholder('Mayor', record['intro_date']))
+                
+        if re.search('Attorney', froms):
+            sponsor_names.append(self._lookup_officeholder('Attorney', record['intro_date']))
+
+        if re.search('Administrator', froms):
+            sponsor_names.append(self._lookup_officeholder('Administrator', record['intro_date']))
+                
+        if re.search('City Clerk', froms):
+            sponsor_names.append(self._lookup_officeholder('City Clerk', record['intro_date']))
+
+        if re.search('Auditor', froms):
+            sponsor_names.append(self._lookup_officeholder('Auditor', record['intro_date']))
+                
+        return sponsor_names
 
     def pluck_attachments(self, key, legislation_attrs):
         try:

@@ -89,6 +89,7 @@ class CouncilMemberTenure(TimestampedModelMixin, models.Model):
     president = models.BooleanField(default=False)
     begin = models.DateField(blank=True)
     end = models.DateField(null=True, blank=True)
+    title = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta (object):
         ordering = ('-begin',)
@@ -136,6 +137,7 @@ class LegFile(TimestampedModelMixin, models.Model):
     version = models.CharField(max_length=100)
     is_routine = models.BooleanField(default=True, blank=True)
     name = models.TextField(null=True, blank=True)
+    froms = models.TextField(null=True, blank=True)
 
     class Meta:
         ordering = ['-key']
@@ -350,7 +352,7 @@ class LegAction(TimestampedModelMixin, models.Model):
 
 class ActionVote(TimestampedModelMixin, models.Model):
     vote = models.CharField(max_length=30)
-    councilmember = models.ForeignKey(CouncilMember)
+    councilmember = models.ForeignKey(CouncilMember, null=True)
     legaction = models.ForeignKey(LegAction, related_name='votes') 
     
     class Meta:

@@ -1,8 +1,9 @@
 from django.db import transaction
 from django.db.utils import IntegrityError
-
 from phillyleg.models import *
-import re
+from sets import Set
+from django.core.exceptions import MultipleObjectsReturned
+
 
 class CouncilmaticDataStoreWrapper (object):
     """
@@ -71,17 +72,6 @@ class CouncilmaticDataStoreWrapper (object):
         sponsor_names = file_record['sponsors']
         del file_record['sponsors']
         
-        if not sponsor_names and file_record.get('froms'):
-            print file_record['froms']
-            cms = CouncilMember.objects.all()
-            for cm in cms:
-                cm_lastname = cm.name.rsplit(None, 1)[-1]  
-                p = re.search(cm_lastname, file_record['froms'])
-                if p:
-                    sponsor_names.append(cm.name)
-                    
-            
-
         # Create the record
         try:
             legfile = LegFile.objects.get(key=file_record['key'])
@@ -101,15 +91,22 @@ class CouncilmaticDataStoreWrapper (object):
         if isinstance(sponsor_names, basestring):
             sponsor_names = sponsor_names.split(',')
 
-        for sponsor_name in sponsor_names:
-            sponsor_name = sponsor_name.strip()
-            sponsor, created = CouncilMember.objects.get_or_create(name=sponsor_name)
-
-            # Add the legislation to the sponsor and save, instead of the other
-            # way around, because saving legislation can be expensive.
-            if sponsor not in existing_sponsors :
-                sponsor.legislation.add(legfile)
-                sponsor.save()
+        if sponsor_names:
+            for sponsor_name in Set(sponsor_names):
+                sponsor_name = sponsor_name.strip()
+                
+                try:
+                    sponsor, _ = CouncilMember.objects.get_or_create(name=sponsor_name)
+                except MultipleObjectsReturned: 
+                    # not sure what to do if we ever end up with a situation where two 
+                    # councilmembers have the same name.
+                    sponsor = CouncilMember.objects.filter(name=sponsor_name)[0]
+        
+                # Add the legislation to the sponsor and save, instead of the other
+                # way around, because saving legislation can be expensive.
+                if sponsor not in existing_sponsors :
+                    sponsor.legislation.add(legfile)
+                    sponsor.save()
 
 
         # Create notes attached to the record
