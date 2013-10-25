@@ -1,7 +1,7 @@
 
 from hosted_legistar_scraper import HostedLegistarSiteWrapper
 import re
-from councilmatic.phillyleg.models import CouncilMember, CouncilMemberTenure
+from phillyleg.models import CouncilMember, CouncilMemberTenure
 import datetime
 
 class OaklandHostedLegistarSiteWrapper (HostedLegistarSiteWrapper):
