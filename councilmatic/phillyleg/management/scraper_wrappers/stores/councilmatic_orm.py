@@ -93,6 +93,8 @@ class CouncilmaticDataStoreWrapper (object):
 
         if sponsor_names:
             for sponsor_name in Set(sponsor_names):
+                if sponsor_name is None:
+                    continue
                 sponsor_name = sponsor_name.strip()
                 
                 try:
