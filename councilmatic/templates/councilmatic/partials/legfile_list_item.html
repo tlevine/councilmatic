@@ -19,7 +19,7 @@
 
 {% for sponsor in file.sponsors.all %}
   {% if forloop.first %}<p> Sponsored by:{% endif %}
-  <a href="/member/{{ sponsor.id }}">{{ sponsor.name }}d</a>
+  <a href="/member/{{ sponsor.id }}">{{ sponsor.name }}</a>
   {% if not forloop.last %},{% else %}</p>{% endif %}
   
 {% endfor %}
