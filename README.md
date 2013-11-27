@@ -6,11 +6,16 @@ This is a fork of Councilmatic to port it for Oakland.
 
 Getting Started
 ---------------
+These directions expect you to have the following programs installed.
+
+* [git](http://git-scm.org).
+* virtualenv
+
 When you see boxes like this, copy the content into the terminal. (Don't type the dollar sign at the beginining.)
 
     $ echo Hello world
 
-First check out the project code. (You need to have already installed [git](http://git-scm.org).)
+First check out the project code.
 
     $ git clone https://github.com/guelo/councilmatic.git
 
