@@ -6,7 +6,7 @@ This is a fork of Councilmatic to port it for Oakland.
 
 Getting Started
 ---------------
-When you see boxes like this, type the content into the terminal. (Don't type the dollar sign at the beginining.)
+When you see boxes like this, copy the content into the terminal. (Don't type the dollar sign at the beginining.)
 
     $ echo Hello world
 
