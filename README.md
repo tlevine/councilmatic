@@ -10,7 +10,7 @@ When you see boxes like this, copy the content into the terminal. (Don't type th
 
     $ echo Hello world
 
-First check out the project code.
+First check out the project code. (You need to have already installed [git](http://git-scm.org).)
 
     $ git clone https://github.com/guelo/councilmatic.git
 
