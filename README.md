@@ -19,15 +19,20 @@ installed. Follow the instructions for doing so on your platform.
 
 In addition, we recommend setting up a virtual environment for working with any
 project, so that you can manage your project-specific dependencies.
+(If installing virtualenv seems annoying, you can skip this part.)
 
     $ cd councilmatic
     $ virtualenv .env --no-site-packages
     $ source .env/bin/activate
     
-Next, install the requirements for Councilmatic (we recommend working in a
-virtual environment, but it's not strictly necessary).
+Next, install the requirements for Councilmatic (Again, we recommend working
+in a virtual environment, but it's not strictly necessary).
 
     $ pip install -r requirements.txt
+    
+If you aren't using virtualenv, you might need to do with root privilges.
+
+    $ sudo pip install -r requirements.txt
 
 Non-Python requirements include:
 
